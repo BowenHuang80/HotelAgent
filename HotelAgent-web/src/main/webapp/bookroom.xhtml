@@ -1,0 +1,84 @@
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+      
+        <ui:composition template="./master.xhtml">
+            <ui:define name="extrastyle">
+                <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"/>
+                <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+                <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>                                    
+                
+                <script>
+                    var unavailableDates = ["9-3-2015", "14-3-2015", "15-3-2015"];
+
+                    function unavailable(date) {
+                        dmy = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+                        if ($.inArray(dmy, unavailableDates) == -1) {
+                            return [true, ""];
+                        } else {
+                            return [false, "", "Unavailable"];
+                        }
+                    }                    
+                    $(function() {
+                      $( "[id^=j_idt][id*=datepicker]" ).datepicker(
+                            {
+                                beforeShowDay: unavailable
+                            });
+                    });
+                </script>                                        
+            </ui:define>
+            <ui:define name="content">
+                    <div class="col-md-12">
+                        <div class="col-sm-6 col-md-4">
+                            <div class="thumbnail" >
+                                <h4 class="text-center"><span class="label label-info"> ${bookingRoomMB.selRoom.roomType}</span></h4>
+                                <h:link outcome="bookroom">
+                                    <h:graphicImage library="imgs" name="0e7fc2d0de764c64a4fd7f01c114fcb2_130_130.jpg" />
+                                </h:link>                                
+                                <div class="caption">
+                                    <div class="row">
+                                        <div class="col-md-6 col-xs-6">
+                                            <h3>Size: ${bookingRoomMB.selRoom.roomSize}</h3>
+                                        </div>
+                                        <div class="col-md-6 col-xs-6 price">
+                                            <h3>
+                                                <label>Price: ${bookingRoomMB.selRoom.roomPrice}</label></h3>
+                                        </div>
+                                    </div>
+                                    <p>${bookingRoomMB.selRoom.roomDescription}</p>
+                                </div>
+                            </div>
+                            
+                        </div>                    
+                    </div>    
+                        <h:form>
+                            <label>Start Date: </label>
+                                <h:inputText id="datepickerS"
+                                             title="From:"
+                                             value="#{bookingRoomMB.startDate}">
+                                    <f:validateRequired />
+                                </h:inputText>
+                            <br/><label>End Date: </label>
+                            <h:inputText id="datepickerE"
+                                         title="To:"
+                                         value="#{bookingRoomMB.endDate}">
+                                <f:validateRequired />
+                            </h:inputText>
+                            <br/><label>Guests with you: </label>
+                                <h:inputText 
+                                         title="Guests:"
+                                         value="#{bookingRoomMB.guests}">
+                                    <f:validateRequired />
+                                </h:inputText>
+                            <h:commandButton action="#{bookingRoomMB.actionBookRoom}" >
+                                <f:param name="selRoomId" value="#{param.selRoomId}" />
+                            </h:commandButton>
+                        </h:form>
+            </ui:define>
+    
+        </ui:composition>        
+
+</html>
+

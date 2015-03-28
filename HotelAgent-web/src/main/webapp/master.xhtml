@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+
+        <h:outputStylesheet library="css" name="bootstrap-theme.min.css"/>
+        <h:outputStylesheet library="css" name="styles.css"/>
+        <!--[if lt IE 9]>
+        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
+        <ui:insert name="extrastyle" >
+        </ui:insert>
+        <style>
+            .btn-product { width: 100%; }
+        </style>               
+        <title>Java Hotel</title>
+    </h:head>
+    
+    <h:body>
+		<section id="body" class="width">
+			<aside id="sidebar" class="column-left">
+
+			<header>
+				<h1><a href="#">HotelAgent</a></h1>
+
+				<h2>Welcome to Java hotel!</h2>				
+			</header>
+
+			<nav id="mainnav">
+  				<ul>
+                    <c:choose>
+                        <c:when test="${activeUserMB.logged}" >
+                            <li>
+                                <h:outputText value="Welcome, #{activeUserMB.userName}" />
+                            </li>
+                            <c:choose>
+                                <c:when test="${activeUserMB.userRole == 'admin'}" >
+                                    <li><h:link value="Rooms" outcome="index" />    </li>
+                                    <li><h:link value="Rooms" outcome="index" />    </li>
+                                    <li><h:link value="Rooms" outcome="index" />    </li>                                
+                                </c:when>
+                                <c:when test="${activeUserMB.userRole == 'guest'}" >
+                                    <li><h:link value="Rooms" outcome="index" />    </li>
+                                </c:when>                                
+                            </c:choose>
+                            <h:form>
+                                <h:commandLink action="#{activeUserMB.actionLogout}" value="Logout" />
+                            </h:form>
+                        </c:when>
+                        <c:otherwise>
+                            <li><h:link value="Rooms" outcome="index" /></li>
+                            <li><h:link value="My Booking" outcome="login" /></li>
+                        </c:otherwise>
+                    </c:choose>
+                </ul>
+			</nav>
+			</aside>
+                <section id="content" class="column-right">
+                    <ui:insert name="content">
+                    </ui:insert>
+            </section>
+		<div class="clear"></div>
+	</section> 
+    <h:outputScript library="js" name="bootstrap.min.js" />        
+    </h:body>
+</html>
