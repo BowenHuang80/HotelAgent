@@ -7,10 +7,12 @@ package boh.jee.ejb.jsfbean;
 
 import boh.jee.ejb.hotelagent.remotelib.HAException;
 import boh.jee.ejb.hotelagent.remotelib.UserServiceRemote;
+import boh.jee.ejb.model.Admin;
 import boh.jee.ejb.model.Booking;
 import boh.jee.ejb.model.BookingDetail;
 import boh.jee.ejb.model.Guest;
 import boh.jee.ejb.model.Room;
+import boh.jee.ejb.model.User;
 import javax.inject.Named;
 
 
@@ -20,8 +22,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+import javax.faces.context.FacesContext;
+import org.primefaces.context.RequestContext;
 
 /**
  *
@@ -32,7 +37,7 @@ import javax.faces.bean.SessionScoped;
 @SessionScoped
 public class ActiveUserMB implements Serializable {
 
-    private List<Booking> bookedRoom;
+    private List<BookingDetail> bookedRoom;
     Guest activeUser;
     private String userName;
     private String userPhone;
@@ -53,20 +58,29 @@ public class ActiveUserMB implements Serializable {
      */
     public ActiveUserMB() {
         activeUser = null;
+        logged = false;
     }
 
-    public String actionSignup() {
-        Guest user = new Guest();
+    /**
+     * For normal user to create a new account
+     * @param role
+     * @return 
+     */
+    public String actionSignup(String role) {
+        Guest user = null;
+        
+        user = new User();
+        
         user.setGuestName(userName);
         user.setGuestPhone(userPhone);
         user.setGuestEmail(userEmail);
         
         if( userSrv.userSignUp(user) ) {
-            return "index";
+            return "roomlist";
         }
         else {
             illegalAccess=true;
-            setErrorMsg("User name already exists.");
+            //setErrorMsg("User name already exists.");
             return "signup";
         }
     }
@@ -78,14 +92,24 @@ public class ActiveUserMB implements Serializable {
 //        } catch (HAException ex) {
 //            Logger.getLogger(ActiveUserMB.class.getName()).log(Level.SEVERE, null, ex);
 //        }
-//        
-        if( userSrv.userLogin(getUserName(), getUserPhone()) ) {
-            activeUser = new Guest();
+        
+        activeUser = (Guest) userSrv.userLogin(getUserName(), getUserPhone()) ;
+        
+        if( null != activeUser ) {
             logged = true;
-            return "index";
+            if( activeUser instanceof Admin ) {
+                setUserRole( "Admin" );
+            }
+            else {
+                setUserRole("User");
+            }
+            
+            return "roomlist?faces-redirect=true";
         }
         else { //login failed
-            return "signup";
+
+            FacesContext.getCurrentInstance().addMessage("loginForm", new FacesMessage("Failed","Username or password is incorrect"));
+            return "";
         }
     }
     
@@ -93,7 +117,7 @@ public class ActiveUserMB implements Serializable {
         userSrv.userLogout();
         activeUser = null;
         logged = false;
-        return "index";
+        return "roomlist";
     }
     
     /**
@@ -155,7 +179,7 @@ public class ActiveUserMB implements Serializable {
     /**
      * @return the isLogged
      */
-    public boolean isLogged() {
+    public boolean getLogged() {
         return logged;
     }
 
@@ -170,7 +194,8 @@ public class ActiveUserMB implements Serializable {
      * @return the userRole
      */
     public String getUserRole() {
-        return userRole;
+        
+        return this.activeUser instanceof Admin ? "admin":"guest";
     }
 
     /**
@@ -198,13 +223,13 @@ public class ActiveUserMB implements Serializable {
      * @return the bookedRoom
      */
     public List<BookingDetail> getBookedRoom() {
-        bookedRoom = (List<Booking>)userSrv.bookedRooms();
-        List<BookingDetail> lst = new ArrayList<BookingDetail>();
-        for( Booking bk : bookedRoom ) {
-            lst.addAll( bk.getBookingDetailCollection() );
-        }
+        bookedRoom = (List<BookingDetail>)userSrv.bookedRooms();
+//        List<BookingDetail> lst = new ArrayList<BookingDetail>();
+//        for( Booking bk : bookedRoom ) {
+//            lst.addAll( bk.getBookingDetailCollection() );
+//        }
         
-        return lst;
+        return bookedRoom;
     }
 
     /**

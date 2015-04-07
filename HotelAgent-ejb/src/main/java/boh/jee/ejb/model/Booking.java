@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries({
     @NamedQuery(name = "Booking.findAll", query = "SELECT b FROM Booking b"),
     @NamedQuery(name = "Booking.findByBookingId", query = "SELECT b FROM Booking b WHERE b.bookingId = :bookingId"),
-    @NamedQuery(name = "Booking.findByGuests", query = "SELECT b FROM Booking b WHERE b.guests = :guests")})
+    @NamedQuery(name = "Booking.findByGuestId", query = "SELECT b FROM Booking b WHERE b.guestId = :guestId")})
 public class Booking implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id

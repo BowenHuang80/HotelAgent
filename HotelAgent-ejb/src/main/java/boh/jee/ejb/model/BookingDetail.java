@@ -31,11 +31,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "BOOKING_DETAIL")
 @XmlRootElement
 @NamedQueries({
+    @NamedQuery(name = "BookingDetail.findByGuestId", query = "SELECT b FROM BookingDetail b WHERE b.guestId = :guestId"),
+    @NamedQuery(name = "BookingDetail.findByStartDate", query = "SELECT b FROM BookingDetail b WHERE b.startDate = :startDate"),
     @NamedQuery(name = "BookingDetail.findAll", query = "SELECT b FROM BookingDetail b"),
     @NamedQuery(name = "BookingDetail.findByBookingDetailId", query = "SELECT b FROM BookingDetail b WHERE b.bookingDetailId = :bookingDetailId"),
     @NamedQuery(name = "BookingDetail.findByStartDate", query = "SELECT b FROM BookingDetail b WHERE b.startDate = :startDate"),
     @NamedQuery(name = "BookingDetail.findByEndDate", query = "SELECT b FROM BookingDetail b WHERE b.endDate = :endDate")})
 public class BookingDetail implements Serializable {
+    @JoinColumn(name = "GUEST_ID", referencedColumnName = "GUEST_ID")
+    @ManyToOne(optional = false)
+    private Guest guestId;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -135,6 +140,14 @@ public class BookingDetail implements Serializable {
     @Override
     public String toString() {
         return "boh.jee.ejb.model.BookingDetail[ bookingDetailId=" + bookingDetailId + " ]";
+    }
+
+    public Guest getGuestId() {
+        return guestId;
+    }
+
+    public void setGuestId(Guest guestId) {
+        this.guestId = guestId;
     }
     
 }

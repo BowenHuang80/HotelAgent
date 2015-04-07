@@ -28,6 +28,6 @@ public class LoginMB {
     
     public String actionLogin() {
         /// userMB.setActiveUser() =
-        return "index";
+        return "roomlist";
     }
 }

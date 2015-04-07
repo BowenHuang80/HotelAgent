@@ -5,25 +5,18 @@
  */
 package boh.jee.ejb.model;
 
-import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
@@ -31,23 +24,8 @@ import javax.xml.bind.annotation.XmlTransient;
  * @author brian
  */
 @Entity
-@Table(name = "GUEST")
-@Inheritance(strategy= InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="GUEST_ROLE", length=4)
-@XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Guest.findAll", query = "SELECT g FROM Guest g"),
-    @NamedQuery(name = "Guest.findByGuestId", query = "SELECT g FROM Guest g WHERE g.guestId = :guestId"),
-    @NamedQuery(name = "Guest.findByGuestName", query = "SELECT g FROM Guest g WHERE g.guestName = :guestName"),
-    @NamedQuery(name = "Guest.findByGuestPhone", query = "SELECT g FROM Guest g WHERE g.guestPhone = :guestPhone"),
-    @NamedQuery(name = "Guest.findByGuestEmail", query = "SELECT g FROM Guest g WHERE g.guestEmail = :guestEmail")})
-public abstract class Guest implements Serializable {
-//    @Basic(optional = false)
-//    @NotNull
-//    @Size(min = 1, max = 4)
-//    @Column(name = "GUEST_ROLE")
-//    private String guestRole;
-    private static final long serialVersionUID = 1L;
+@DiscriminatorValue(value = "USER")
+public class User extends Guest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -68,21 +46,29 @@ public abstract class Guest implements Serializable {
     @Size(min = 1, max = 50)
     @Column(name = "GUEST_EMAIL")
     private String guestEmail;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 4)
+    @Column(name = "GUEST_ROLE")
+    private String guestRole;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "guestId")
+    private Collection<BookingDetail> bookingDetailCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "guestId")
     private Collection<Booking> bookingCollection;
 
-    public Guest() {
+    public User() {
     }
 
-    public Guest(Integer guestId) {
+    public User(Integer guestId) {
         this.guestId = guestId;
     }
 
-    public Guest(Integer guestId, String guestName, String guestPhone, String guestEmail) {
+    public User(Integer guestId, String guestName, String guestPhone, String guestEmail, String guestRole) {
         this.guestId = guestId;
         this.guestName = guestName;
         this.guestPhone = guestPhone;
         this.guestEmail = guestEmail;
+        this.guestRole = guestRole;
     }
 
     public Integer getGuestId() {
@@ -117,6 +103,23 @@ public abstract class Guest implements Serializable {
         this.guestEmail = guestEmail;
     }
 
+    public String getGuestRole() {
+        return guestRole;
+    }
+
+    public void setGuestRole(String guestRole) {
+        this.guestRole = guestRole;
+    }
+
+    @XmlTransient
+    public Collection<BookingDetail> getBookingDetailCollection() {
+        return bookingDetailCollection;
+    }
+
+    public void setBookingDetailCollection(Collection<BookingDetail> bookingDetailCollection) {
+        this.bookingDetailCollection = bookingDetailCollection;
+    }
+
     @XmlTransient
     public Collection<Booking> getBookingCollection() {
         return bookingCollection;
@@ -136,10 +139,10 @@ public abstract class Guest implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Guest)) {
+        if (!(object instanceof User)) {
             return false;
         }
-        Guest other = (Guest) object;
+        User other = (User) object;
         if ((this.guestId == null && other.guestId != null) || (this.guestId != null && !this.guestId.equals(other.guestId))) {
             return false;
         }
@@ -148,15 +151,7 @@ public abstract class Guest implements Serializable {
 
     @Override
     public String toString() {
-        return "boh.jee.ejb.model.Guest[ guestId=" + guestId + " ]";
+        return "boh.jee.ejb.model.User[ guestId=" + guestId + " ]";
     }
-
-//    public String getGuestRole() {
-//        return guestRole;
-//    }
-//
-//    public void setGuestRole(String guestRole) {
-//        this.guestRole = guestRole;
-//    }
     
 }

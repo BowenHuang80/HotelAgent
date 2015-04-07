@@ -16,7 +16,7 @@ public interface UserServiceRemote {
 
     void bookRoom(Integer roomId, String startDate, String endDate, Integer guests) throws HAException;
 
-    Boolean userLogin(String name, String phone);
+    Object userLogin(String name, String phone);
 
     void userLogout();
 
@@ -25,5 +25,9 @@ public interface UserServiceRemote {
     Object bookedRooms();
 
     void testException() throws HAException;
+
+    void addRoom(Object newRoom) throws HAException;
+
+    void deleteRoom(Integer Integer) throws HAException;
     
 }

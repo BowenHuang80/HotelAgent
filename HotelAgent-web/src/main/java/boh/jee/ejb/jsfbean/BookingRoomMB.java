@@ -161,7 +161,8 @@ public class BookingRoomMB implements java.io.Serializable {
         selectedRoomId = params.get("selRoomId");
         
         try {
-            userMB.getUserSrv().bookRoom(Integer.parseInt(selectedRoomId), startDate, endDate, Integer.parseInt(guests) );
+            UserServiceRemote rms = userMB.getUserSrv();
+            rms.bookRoom(Integer.parseInt(selectedRoomId), startDate, endDate, Integer.parseInt(guests) );
         } catch (HAException ex) {
             Logger.getLogger(BookingRoomMB.class.getName()).log(Level.SEVERE, null, ex);
              return "login?user=0";

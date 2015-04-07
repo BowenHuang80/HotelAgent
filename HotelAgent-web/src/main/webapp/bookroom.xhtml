@@ -1,8 +1,11 @@
-
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:ui="http://java.sun.com/jsf/facelets">
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui">
       
         <ui:composition template="./master.xhtml">
             <ui:define name="extrastyle">
@@ -11,7 +14,7 @@
                 <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>                                    
                 
                 <script>
-                    var unavailableDates = ["9-3-2015", "14-3-2015", "15-3-2015"];
+                    var unavailableDates = ["9-3-2015", "14-3-2015", "15-3-2015"]; //replace this string arry with real data
 
                     function unavailable(date) {
                         dmy = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
@@ -29,14 +32,35 @@
                     });
                 </script>                                        
             </ui:define>
+            
+            <ui:define name="navbar">
+                 <h3>
+                <h:outputFormat value="Welcome, {0}!" rendered="${activeUserMB.logged}">
+                    <f:param value="#{activeUserMB.userName}"/>
+                </h:outputFormat>
+                </h3>
+                <li>
+                <h:form>
+                    <h:commandLink action="#{activeUserMB.actionLogout()}" rendered="${activeUserMB.logged}" >
+                        Log out
+                    </h:commandLink>
+                </h:form>
+                <h:link  outcome="login" rendered="${!activeUserMB.logged}" >
+                    Log in
+                </h:link>                    
+                </li>
+                <li>
+                    <h:link outcome="roomlist" value="Rooms" />
+                </li>
+            </ui:define>
             <ui:define name="content">
                     <div class="col-md-12">
                         <div class="col-sm-6 col-md-4">
                             <div class="thumbnail" >
                                 <h4 class="text-center"><span class="label label-info"> ${bookingRoomMB.selRoom.roomType}</span></h4>
-                                <h:link outcome="bookroom">
+                                
                                     <h:graphicImage library="imgs" name="0e7fc2d0de764c64a4fd7f01c114fcb2_130_130.jpg" />
-                                </h:link>                                
+
                                 <div class="caption">
                                     <div class="row">
                                         <div class="col-md-6 col-xs-6">

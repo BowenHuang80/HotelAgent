@@ -5,6 +5,8 @@ body {
 	margin:0px auto;
 	padding:0;
 	background: #222;
+    -webkit-font-smoothing: antialiased;
+    font: normal 14px Roboto,arial,sans-serif;    
 	font-family: 'Oxygen', 'sans-serif';
 	font-size: 1.0em;
 	color:#555;
@@ -14,6 +16,12 @@ body {
 	padding:0;
 }
 
+h4 { 
+ border:0 solid #fff; 
+ border-bottom-width:1px;
+ padding-bottom:10px;
+ text-align: center;
+}
 
 /** element defaults **/
 table {

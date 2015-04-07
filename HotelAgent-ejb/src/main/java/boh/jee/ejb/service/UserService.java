@@ -5,15 +5,19 @@
  */
 package boh.jee.ejb.service;
 
+import boh.jee.ejb.hotelagent.remotelib.GenericCrudAdmin;
 import boh.jee.ejb.hotelagent.remotelib.HAException;
 import boh.jee.ejb.hotelagent.remotelib.UserServiceRemote;
+import boh.jee.ejb.model.Admin;
 import boh.jee.ejb.model.Booking;
 import boh.jee.ejb.model.BookingDetail;
 import boh.jee.ejb.model.Guest;
 import boh.jee.ejb.model.Room;
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -23,6 +27,7 @@ import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnit;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
@@ -32,7 +37,7 @@ import javax.persistence.TypedQuery;
  */
 @Stateful
 @TransactionManagement(value=TransactionManagementType.CONTAINER)
-public class UserService implements UserServiceRemote {
+public class UserService implements UserServiceRemote, GenericCrudAdmin {
 
     @PersistenceContext(unitName="boh.jee.ejb_HotelAgent-ejb_ejb_1.0-SNAPSHOTPU")
     private EntityManager em;
@@ -62,6 +67,7 @@ public class UserService implements UserServiceRemote {
        
         bkD.setBookingId(booking);
         bkD.setRoomId(tgtRoom);
+        bkD.setGuestId(activeUser);
         
         Date sD, eD;
         
@@ -75,7 +81,11 @@ public class UserService implements UserServiceRemote {
             throw new HAException("Wrong Date Format");
         }
         
+        bkD.setStartDate(sD);
+        bkD.setEndDate(eD);
         
+        lst.add(bkD);
+        booking.setBookingDetailCollection(lst);
         em.persist(booking);
     }
 
@@ -84,8 +94,8 @@ public class UserService implements UserServiceRemote {
     // "Insert Code > Add Business Method")
 
     @Override
-    public Boolean userLogin(String name, String phone) {
-        Boolean result = false;
+    public Object userLogin(String name, String phone) {
+        Guest result = null;
         
         TypedQuery q = em.createNamedQuery("Guest.findByGuestName", Guest.class);
         q.setParameter("guestName", name);
@@ -95,7 +105,7 @@ public class UserService implements UserServiceRemote {
         for( Guest tgtUser : users ) {
             if( tgtUser.getGuestPhone().equals(phone) ) {
                 activeUser = tgtUser;
-                result = true;
+                result = tgtUser;
                 break;
             }
         }
@@ -132,11 +142,19 @@ public class UserService implements UserServiceRemote {
 
     @Override
     public Object bookedRooms() {
-        List<Booking> allBookings = new ArrayList<Booking>();
+        List<BookingDetail> allBookings = new ArrayList<BookingDetail>();
         
         if( activeUser != null ) {
-            Query q = em.createNamedQuery("Booking.findByGuests");
-        
+            Query q = em.createNamedQuery("BookingDetail.findByGuestId");
+            q.setParameter("guestId", this.activeUser);
+            List<BookingDetail> lst = q.getResultList();
+//            for(Booking bking : lst) {
+//                Collection<BookingDetail> bkds = bking.getBookingDetailCollection();
+//                for(BookingDetail bkd : bkds) {
+//                    bkd.getRoomId();
+//                    //bkd.
+//                }
+//            }
             allBookings.addAll(q.getResultList());
         }
        
@@ -148,6 +166,90 @@ public class UserService implements UserServiceRemote {
         
         throw new HAException("test exception");
     }
+    /**
+     * Operations for Admin
+     */
+
+    
+    /**
+     * @SPEC 1.1.a
+     * @param newRoom
+     * @throws HAException 
+     */
+    @Override
+    public void addRoom(Object newRoom) throws HAException {
+        if( !(activeUser instanceof Admin )) {
+            throw new HAException("Illegal Access");
+        }
+        
+        try{
+            em.persist(newRoom) ;
+        } catch( Exception e) {
+            throw new HAException(e.getMessage());
+        }
+    }
+
+    /**
+     * @SPEC 1.1.a
+     * @param Integer
+     * @throws HAException 
+     */
+    @Override
+    public void deleteRoom(Integer Integer) throws HAException {
+        throw new HAException("TODO Method");
+    }
+
+
+    protected boolean isAdmin() {
+        if( activeUser == null || !(activeUser instanceof Admin) ) {
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Generic Interface for Admin 
+     * @param t
+     * @return 
+     */
+    @Override
+    public Serializable create(Serializable t) throws HAException {
+        if( !isAdmin() ) {
+            throw new HAException("Illegal Access");
+        }
+        em.persist(t);
+        return t;        
+    }
+
+    @Override
+    public Serializable find(Serializable id, Class type) {
+        if( !isAdmin() ) {
+            //throw new HAException("Illegal Access");
+        }
+        em.find(type, id);
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void delete(Serializable t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Serializable update(Serializable t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Collection<Serializable> findByNamedQuery(String queryName) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Collection<Serializable> findByNamedQuery(String queryName, int resultLimit) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
     
     
 }

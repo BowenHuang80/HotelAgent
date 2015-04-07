@@ -64,6 +64,7 @@ public class RoomsController {
         ObjectMapper mapper = new ObjectMapper();
         Object jsonobj;
         List<Room> lst = (List<Room>)rmService.getAll();
+
         jsonobj = lst;
         try {
             json = mapper.writeValueAsString(jsonobj);

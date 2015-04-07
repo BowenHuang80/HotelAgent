@@ -13,6 +13,7 @@ import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnit;
 import javax.persistence.Query;
 
 /**
@@ -30,7 +31,9 @@ public class RoomService implements RoomServiceRemote {
     public Object getAll() {
         Query q = em.createNamedQuery("Room.findAll");
         List<Room> lst = q.getResultList();
-        
+        for( Room rm : lst) {
+            rm.setBookingDetailCollection(null);
+        }
         return lst;
     }
 
