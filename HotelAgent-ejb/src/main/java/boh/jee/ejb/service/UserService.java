@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.ejb.Stateful;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
@@ -30,6 +31,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+//import javax.validation.constraints.Future;
 
 /**
  *
@@ -44,11 +46,30 @@ public class UserService implements UserServiceRemote, GenericCrudAdmin {
     
     Guest activeUser = null;
     
+    @PreDestroy
+    public void preDestory() {
+        userLogout();
+        em.close();        
+    }
+
     
     @Override
-    public void bookRoom(Integer roomId, String startDate, String endDate, Integer guests) throws HAException
-    {
+    public void updateBooking(Integer bookingDetailId, Date startDate, Date endDate, Integer guests) throws HAException {
         
+        BookingDetail bkd = em.getReference(BookingDetail.class, bookingDetailId);
+        
+        Booking bk = bkd.getBookingId();
+        
+        bk.setGuests((short) guests.intValue());
+        bkd.setStartDate(startDate);
+        bkd.setEndDate(endDate);
+        
+        em.merge(bk);
+    }    
+    
+    @Override
+    public void bookRoom(Integer roomId, Date startDate, Date  endDate, Integer guests) throws HAException
+    {
         if( activeUser == null ) {
             throw new HAException("Illegal access");
         }
@@ -67,31 +88,14 @@ public class UserService implements UserServiceRemote, GenericCrudAdmin {
        
         bkD.setBookingId(booking);
         bkD.setRoomId(tgtRoom);
-        bkD.setGuestId(activeUser);
-        
-        Date sD, eD;
-        
-        SimpleDateFormat ft = new SimpleDateFormat ("MM/dd/yyyy"); 
-
-        try {
-            sD = ft.parse(startDate);
-            eD = ft.parse(endDate);
-            
-        } catch (ParseException ex) {
-            throw new HAException("Wrong Date Format");
-        }
-        
-        bkD.setStartDate(sD);
-        bkD.setEndDate(eD);
+        bkD.setGuestId(activeUser);        
+        bkD.setStartDate(startDate);
+        bkD.setEndDate(endDate);
         
         lst.add(bkD);
         booking.setBookingDetailCollection(lst);
         em.persist(booking);
     }
-
-    
-    // Add business logic below. (Right-click in editor and choose
-    // "Insert Code > Add Business Method")
 
     @Override
     public Object userLogin(String name, String phone) {
@@ -142,19 +146,14 @@ public class UserService implements UserServiceRemote, GenericCrudAdmin {
 
     @Override
     public Object bookedRooms() {
-        List<BookingDetail> allBookings = new ArrayList<BookingDetail>();
+        List<BookingDetail> allBookings = null;
         
         if( activeUser != null ) {
+             allBookings = new ArrayList<BookingDetail>();
             Query q = em.createNamedQuery("BookingDetail.findByGuestId");
             q.setParameter("guestId", this.activeUser);
             List<BookingDetail> lst = q.getResultList();
-//            for(Booking bking : lst) {
-//                Collection<BookingDetail> bkds = bking.getBookingDetailCollection();
-//                for(BookingDetail bkd : bkds) {
-//                    bkd.getRoomId();
-//                    //bkd.
-//                }
-//            }
+
             allBookings.addAll(q.getResultList());
         }
        
@@ -166,10 +165,10 @@ public class UserService implements UserServiceRemote, GenericCrudAdmin {
         
         throw new HAException("test exception");
     }
+
     /**
      * Operations for Admin
      */
-
     
     /**
      * @SPEC 1.1.a
@@ -226,8 +225,8 @@ public class UserService implements UserServiceRemote, GenericCrudAdmin {
         if( !isAdmin() ) {
             //throw new HAException("Illegal Access");
         }
-        em.find(type, id);
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Serializable obj = (Serializable)em.find(type, id);
+        return obj;
     }
 
     @Override
@@ -249,7 +248,5 @@ public class UserService implements UserServiceRemote, GenericCrudAdmin {
     public Collection<Serializable> findByNamedQuery(String queryName, int resultLimit) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
     
 }

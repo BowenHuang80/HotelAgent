@@ -32,7 +32,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "BookingDetail.findByGuestId", query = "SELECT b FROM BookingDetail b WHERE b.guestId = :guestId"),
-    @NamedQuery(name = "BookingDetail.findByStartDate", query = "SELECT b FROM BookingDetail b WHERE b.startDate = :startDate"),
+    @NamedQuery(name = "BookingDetail.findAvaliableDates", query = "SELECT b FROM BookingDetail b WHERE b.roomId = :roomId and ((b.startDate >= :startDate and b.startDate <= :endDate) or (b.endDate >= :startDate and b.endDate <= :endDate))"),
     @NamedQuery(name = "BookingDetail.findAll", query = "SELECT b FROM BookingDetail b"),
     @NamedQuery(name = "BookingDetail.findByBookingDetailId", query = "SELECT b FROM BookingDetail b WHERE b.bookingDetailId = :bookingDetailId"),
     @NamedQuery(name = "BookingDetail.findByStartDate", query = "SELECT b FROM BookingDetail b WHERE b.startDate = :startDate"),

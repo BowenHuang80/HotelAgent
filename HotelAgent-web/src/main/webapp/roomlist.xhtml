@@ -21,14 +21,16 @@
                 <h:link  outcome="login" rendered="${!activeUserMB.logged}" >
                     Log in
                 </h:link>
-                    
+                <h:link outcome="mybookedrooms" rendered="${activeUserMB.logged}">
+                    My Bookings
+                </h:link>                   
                 </li>
+                
             </ui:define>
             <ui:define name="content">
                  <ui:repeat value="#{roomListMB.roomList}" var="room" varStatus="loop">
 
                     <div class="col-md-12">
-                        <div class="col-sm-6 col-md-4">
                             <div class="thumbnail" >
                                 <h4 class="text-center"><span class="label label-info"> ${room.roomType}</span></h4>
                                 <h:link outcome="bookroom">
@@ -47,13 +49,12 @@
                                     </div>
                                     <p>${room.roomDescription}</p>
                                     <p> </p>
+                                    <br />
                                     <h:button value="Book" outcome="bookroom" >
                                         <f:param name="selRoomId" value="${room.roomId}" />
                                     </h:button>
-                                </div>                                
-                            </div>
-                            
-                        </div>                    
+                                </div>
+                        </div>
                     </div>    
                  </ui:repeat>                    
                  

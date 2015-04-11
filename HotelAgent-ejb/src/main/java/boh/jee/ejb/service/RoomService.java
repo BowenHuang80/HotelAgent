@@ -6,7 +6,9 @@
 package boh.jee.ejb.service;
 
 import boh.jee.ejb.hotelagent.remotelib.RoomServiceRemote;
+import boh.jee.ejb.model.BookingDetail;
 import boh.jee.ejb.model.Room;
+import java.util.Date;
 import java.util.List;
 import javax.ejb.Singleton;
 import javax.ejb.TransactionManagement;
@@ -45,4 +47,22 @@ public class RoomService implements RoomServiceRemote {
         
         return em.find(Room.class, roomId);
     }
+
+    @Override
+    public Object findRoomAvailability(Integer roomId, Date startDate, Date endDate) {
+        
+        Room tgtRoom;
+        tgtRoom = em.getReference(Room.class, roomId);
+        
+        Query q = em.createNamedQuery("BookingDetail.findAvaliableDates");
+        q.setParameter("roomId", tgtRoom);
+        q.setParameter("startDate", startDate);
+        q.setParameter("endDate", endDate);
+        
+        List<BookingDetail> lst = q.getResultList();
+
+        return lst;
+    }
+    
+    
 }

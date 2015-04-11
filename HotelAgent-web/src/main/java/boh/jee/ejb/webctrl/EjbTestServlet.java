@@ -5,23 +5,17 @@
  */
 package boh.jee.ejb.webctrl;
 
-import boh.jee.ejb.hotelagent.remotelib.RoomServiceRemote;
 import boh.jee.ejb.model.Guest;
-import boh.jee.ejb.model.Room;
 import boh.jee.jpa.dao.GuestDao;
-import boh.jee.jpa.dao.RoomDao;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,11 +24,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author brian
  */
-@WebServlet(name = "HotelController", urlPatterns = {"/servlet"})
-public class HotelController extends HttpServlet {
-
-    private RoomServiceRemote remoteIF;
-    private List<Room> roomList;// = (List<Books>)remoteIF.getBookList();
+public class EjbTestServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -46,42 +36,21 @@ public class HotelController extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException 
-    {
+            throws ServletException, IOException {
         
-        remoteIF = (RoomServiceRemote)request.getSession().getAttribute("boh.jee.ejb.RoomServiceRemote");
-        if( null == remoteIF ) {
+        GuestDao guestDao = null;
             try {
                 Context ctx = new InitialContext();
-                remoteIF = (RoomServiceRemote)ctx.lookup(RoomServiceRemote.class.getName());
-                request.getSession().setAttribute("boh.jee.ejb.RoomServiceRemote", remoteIF);
+                
+                guestDao = (GuestDao)ctx.lookup(GuestDao.class.getName());
+                request.getSession().setAttribute("boh.jee.jpa.dao.GuestDao", guestDao);
             } catch (NamingException ex) {
                 Logger.getLogger(HotelController.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
-
-        roomList = (List<Room>)request.getSession().getAttribute("ROOMS_LIST");
-        if( roomList == null ) {
-            roomList = (List<Room>)remoteIF.getAll();
-            request.setAttribute("ROOMS_LIST", roomList);
-        }
         
-        String action = request.getParameter("action");
-        
-        if( action != null && action.equalsIgnoreCase("bookroom") ) {
-            String roomId = request.getParameter("roomId");
-            String roomType = request.getParameter("roomType");
-            
-            RequestDispatcher rd = getServletContext().getRequestDispatcher("/bookroom.jsp");
-            rd.forward(request, response);                    
-        }
-        else {
+            List<Guest> result = guestDao.findGuestByName("Brian");
 
-            request.setAttribute("ROOMS_LIST", roomList);
-            
-            RequestDispatcher rd = getServletContext().getRequestDispatcher("/roomlist.jsp");
-            rd.forward(request, response);
-        }
+            System.out.println(result.get(0).getGuestName());
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

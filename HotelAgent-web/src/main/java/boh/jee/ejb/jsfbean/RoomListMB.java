@@ -10,6 +10,7 @@ import boh.jee.ejb.model.Room;
 import java.io.Serializable;
 import java.util.List;
 import javax.ejb.EJB;
+import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 /**
@@ -17,7 +18,8 @@ import javax.faces.bean.SessionScoped;
  * @author brian
  */
 @ManagedBean
-@SessionScoped
+//@SessionScoped
+@ApplicationScoped
 public class RoomListMB implements Serializable {
 
     @EJB

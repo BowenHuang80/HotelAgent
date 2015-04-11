@@ -17,7 +17,9 @@ import javax.inject.Named;
 
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -99,12 +101,14 @@ public class ActiveUserMB implements Serializable {
             logged = true;
             if( activeUser instanceof Admin ) {
                 setUserRole( "Admin" );
+                return "adminpanel?faces-redirect=true";
             }
             else {
                 setUserRole("User");
+                return "roomlist?faces-redirect=true";
             }
             
-            return "roomlist?faces-redirect=true";
+            
         }
         else { //login failed
 
@@ -117,7 +121,7 @@ public class ActiveUserMB implements Serializable {
         userSrv.userLogout();
         activeUser = null;
         logged = false;
-        return "roomlist";
+        return "roomlist?faces-redirect=true";
     }
     
     /**
@@ -223,15 +227,22 @@ public class ActiveUserMB implements Serializable {
      * @return the bookedRoom
      */
     public List<BookingDetail> getBookedRoom() {
-        bookedRoom = (List<BookingDetail>)userSrv.bookedRooms();
+        if( bookedRoom == null) {
+            bookedRoom = (List<BookingDetail>)userSrv.bookedRooms();
+            if( bookedRoom == null ) {
+                bookedRoom = new ArrayList<BookingDetail>();
+            }
+        }
 //        List<BookingDetail> lst = new ArrayList<BookingDetail>();
 //        for( Booking bk : bookedRoom ) {
 //            lst.addAll( bk.getBookingDetailCollection() );
 //        }
-        
         return bookedRoom;
     }
-
+    
+    public void setBookedRoom(List<BookingDetail> lst) {
+        this.bookedRoom = lst;
+    }
     /**
      * @return the errorMsg
      */
@@ -246,6 +257,25 @@ public class ActiveUserMB implements Serializable {
         this.errorMsg = errorMsg;
     }
     
+    public String actionUpdateBooking(BookingDetail bkd) {
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+        
+        String url = "bookroom" + "?faces-redirect=true&selRoomId="+bkd.getRoomId().getRoomId().intValue() 
+                + "&startDate="+sdf.format( bkd.getStartDate() )
+                + "&endDate=" + sdf.format(bkd.getEndDate())
+                + "&guests=" + bkd.getBookingId().getGuests()
+                + "&update=" + bkd.getBookingDetailId().intValue();
+        
+        return url;
+    }
+    
+    public boolean getBookingChangable(BookingDetail bkd) {
+        Date tdy = new Date();
+        if( tdy.after( bkd.getStartDate() ) ) {
+            return false;
+        }
+        return true;
+    } 
     public static class BookingRooms {
         Room room;
         BookingDetail bookingDetail;

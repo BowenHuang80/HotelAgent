@@ -3,22 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package boh.jee.ejb.hotelagent.remotelib;
+package boh.jee.jpa.dao;
 
-import java.util.Date;
+import boh.jee.ejb.model.Guest;
+import java.util.List;
 import javax.ejb.Remote;
+import javax.ejb.Stateless;
 
 /**
  *
  * @author brian
  */
 @Remote
-public interface RoomServiceRemote {
-
-    Object getAll();
-
-    Object getRoomById(Integer roomId);
-
-    Object findRoomAvailability(Integer roomId, Date startDate, Date endDate);
-    
+public interface GuestDao extends GenericDao<Guest,Integer> {
+    List findGuestByEmail(String email);
+    List findGuestByName(String name);
 }

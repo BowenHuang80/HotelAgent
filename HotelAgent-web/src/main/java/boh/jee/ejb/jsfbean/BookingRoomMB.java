@@ -8,8 +8,13 @@ package boh.jee.ejb.jsfbean;
 import boh.jee.ejb.hotelagent.remotelib.HAException;
 import boh.jee.ejb.hotelagent.remotelib.RoomServiceRemote;
 import boh.jee.ejb.hotelagent.remotelib.UserServiceRemote;
+import boh.jee.ejb.model.BookingDetail;
 import boh.jee.ejb.model.Guest;
 import boh.jee.ejb.model.Room;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -31,6 +36,8 @@ import javax.faces.context.FacesContext;
 @RequestScoped
 public class BookingRoomMB implements java.io.Serializable {
 
+    @EJB
+    private RoomServiceRemote rm;
     
     @ManagedProperty(value="#{roomListMB}")
     RoomListMB roomsMB;
@@ -44,16 +51,33 @@ public class BookingRoomMB implements java.io.Serializable {
   
     Room selRoom;  
     
-    private String startDate;
-    private String endDate;
+    //@Future(message = "You can't book for the past")
+    private Date startDate;
+    //@Future(message = "You can't book for the past")
+    private Date endDate;
+    
     private String guests;
     
     
+    private String roomAvailability;
+    private String updateBookingId;
     /**
      * Creates a new instance of SelectedRoomMB
      */
     public BookingRoomMB() {
         selRoom = null;
+        
+        Map<String,String> params = 
+                      FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+        
+        String upd = params.get("update");
+        if(upd != null && !upd.isEmpty() )  {
+            updateBookingId = upd;
+        }
+        else {
+            updateBookingId = null;
+        }
+        
     }
     
     public void bookRoom(){
@@ -93,14 +117,16 @@ public class BookingRoomMB implements java.io.Serializable {
      * @return the selRoom
      */
     public Room getSelRoom() {
-        int roomId = Integer.parseInt(selectedRoomId);
-        for( Room rm : roomsMB.getRoomList() ) {
-            if( rm.getRoomId() == roomId ) {
-                selRoom = rm;
-                break;
+        if( selRoom == null ) {
+            int roomId = Integer.parseInt(selectedRoomId);
+
+            for( Room rm : roomsMB.getRoomList() ) {
+                if( rm.getRoomId() == roomId ) {
+                    selRoom = rm;
+                    break;
+                }
             }
         }
-
         return selRoom;
     }
 
@@ -115,28 +141,66 @@ public class BookingRoomMB implements java.io.Serializable {
     /**
      * @return the startDate
      */
-    public String getStartDate() {
+    public Date getStartDate() {
+        
+        if( startDate == null ) {
+            
+            if( getUpdateBookingId() != null ) {
+                if( selRoom != null ) {
+                    Map<String,String> params = 
+                                  FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+                    String sD = (String)params.get("startDate");
+                    String eD = (String)params.get("endDate");
+                    String gst = (String)params.get("guests");
+                    
+                    SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+                    try {
+                        startDate = sdf.parse(sD);
+                    } catch (ParseException ex) {
+                        Logger.getLogger(BookingRoomMB.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }
         return startDate;
     }
 
     /**
      * @param startDate the startDate to set
      */
-    public void setStartDate(String startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
     /**
      * @return the endDate
      */
-    public String getEndDate() {
+    public Date getEndDate() {
+        if( endDate == null ) {
+            
+            if( getUpdateBookingId() != null ) {
+                if( selRoom != null ) {
+                    Map<String,String> params = 
+                                  FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+                    String eD = (String)params.get("endDate");
+                    
+                    SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+                    try {
+                        endDate = sdf.parse(eD);
+                    } catch (ParseException ex) {
+                        Logger.getLogger(BookingRoomMB.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }
+        
         return endDate;
     }
 
     /**
      * @param endDate the endDate to set
      */
-    public void setEndDate(String endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 
@@ -144,6 +208,18 @@ public class BookingRoomMB implements java.io.Serializable {
      * @return the guests
      */
     public String getGuests() {
+
+        if( guests == null ) {
+            
+            if( getUpdateBookingId() != null ) {
+                if( selRoom != null ) {
+                    Map<String,String> params = 
+                                  FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+                    guests = (String)params.get("guests");
+                }
+            }
+        }
+        
         return guests;
     }
 
@@ -154,19 +230,36 @@ public class BookingRoomMB implements java.io.Serializable {
         this.guests = guests;
     }
 
+    public String actionUpdateBooking() {
+        UserServiceRemote rms = userMB.getUserSrv();
+        
+        try {
+            if(getUpdateBookingId() != null ) {
+                rms.updateBooking(Integer.parseInt(getUpdateBookingId()), startDate,endDate, Integer.parseInt(guests));
+                this.userMB.setBookedRoom(null);
+            }
+        } catch (HAException ex) {
+            Logger.getLogger(BookingRoomMB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return "mybookedrooms";        
+    }
+    
     public String actionBookRoom() {
         Map<String,String> params = 
                       FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
         
         selectedRoomId = params.get("selRoomId");
         
+        UserServiceRemote rms = userMB.getUserSrv();
+        
         try {
-            UserServiceRemote rms = userMB.getUserSrv();
-            rms.bookRoom(Integer.parseInt(selectedRoomId), startDate, endDate, Integer.parseInt(guests) );
+                rms.bookRoom(Integer.parseInt(selectedRoomId), startDate, endDate, Integer.parseInt(guests) );
         } catch (HAException ex) {
             Logger.getLogger(BookingRoomMB.class.getName()).log(Level.SEVERE, null, ex);
-             return "login?user=0";
+            return "login?faces-redirect=true";
         }
+
         
         return "mybookedrooms";
     }
@@ -183,6 +276,51 @@ public class BookingRoomMB implements java.io.Serializable {
      */
     public void setUserMB(ActiveUserMB userMB) {
         this.userMB = userMB;
+    }
+
+    /**
+     * @return the roomAvailability
+     */
+    public String getRoomAvailability() {
+        //["9-3-2015", "14-3-2015", "15-3-2015"]
+        Calendar cal = Calendar.getInstance();
+        Date tdy = new Date();
+        cal.setTime(tdy);
+        cal.add(Calendar.DATE, 60);
+        Date end = cal.getTime();
+        List<BookingDetail> dts = (List<BookingDetail>) rm.findRoomAvailability(getSelRoom().getRoomId(), tdy, end);
+        StringBuilder sb = new StringBuilder();
+        //2015-03-09T12:00:00Z
+        
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        
+        for( BookingDetail bkd : dts ) {
+            Date sD = bkd.getStartDate();
+            Date eD = bkd.getEndDate();
+            if(sb.length() > 0 ) {
+                sb.append(",");
+            }
+            sb.append("{")
+            .append("startDate : \"").append(sdf.format(sD)).append("T12:00:00Z\"")
+            .append(", endDate : \"").append(sdf.format(eD)).append("T12:00:00Z\"}");
+        }
+        roomAvailability = sb.toString();
+        
+        return roomAvailability;
+    }
+
+    /**
+     * @param roomAvailability the roomAvailability to set
+     */
+    public void setRoomAvailability(String roomAvailability) {
+        this.roomAvailability = roomAvailability;
+    }
+
+    /**
+     * @return the updateBookingId
+     */
+    public String getUpdateBookingId() {
+        return updateBookingId;
     }
     
 }

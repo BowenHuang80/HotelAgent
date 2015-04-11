@@ -12,24 +12,69 @@
                 <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"/>
                 <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
                 <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>                                    
-                
-                <script>
-                    var unavailableDates = ["9-3-2015", "14-3-2015", "15-3-2015"]; //replace this string arry with real data
 
-                    function unavailable(date) {
-                        dmy = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
-                        if ($.inArray(dmy, unavailableDates) == -1) {
-                            return [true, ""];
-                        } else {
-                            return [false, "", "Unavailable"];
-                        }
-                    }                    
-                    $(function() {
-                      $( "[id^=j_idt][id*=datepicker]" ).datepicker(
-                            {
-                                beforeShowDay: unavailable
-                            });
-                    });
+                <script>
+$(function(){
+var dates = {
+    convert:function(d) {
+        return (
+            d.constructor === Date ? d :
+            d.constructor === Array ? new Date(d[0],d[1],d[2]) :
+            d.constructor === Number ? new Date(d) :
+            d.constructor === String ? new Date(d) :
+            typeof d === "object" ? new Date(d.year,d.month,d.date) :
+            NaN
+        );
+    },
+    compare:function(a,b) {
+        return (
+            isFinite(a=this.convert(a).valueOf()) &amp;&amp;
+            isFinite(b=this.convert(b).valueOf()) ?
+            (a&gt;b)-(a&lt;b) :
+            NaN
+        );
+    },
+    inRange:function(d,start,end) {
+       return (
+            isFinite(d=this.convert(d).valueOf()) &amp;&amp;
+            isFinite(start=this.convert(start).valueOf()) &amp;&amp;
+            isFinite(end=this.convert(end).valueOf()) ?
+            start &lt;= d &amp;&amp; d &lt;= end :
+            NaN
+        );
+    }
+}    
+var unavailableDates = [${bookingRoomMB.roomAvailability}];//[{startDate:"3-9-2015", endDate : "2015-03-14T12:00:00Z"}]; 
+//var sd = new Date("2015-03-09T12:00:00Z");
+    
+function unavailable(date) {
+    var startdate;
+    var enddate;
+    var result = true;
+    
+    for( var dt in unavailableDates ) {
+        startdate = new Date(unavailableDates[dt].startDate);
+        enddate = new Date(unavailableDates[dt].endDate);
+        if(dates.inRange(date,startdate,enddate ) ) {
+            result = false;
+            break;
+        }
+    }    
+    
+    if ( !result ){
+        return [false, "", "Unavailable"];
+    } else {
+        return [true, ""];
+    }
+}
+    
+    $( "[id^=j_idt][id*=datepicker]" ).datepicker(
+        {
+            minDate: new Date(),
+            maxDate: "+2m",
+            beforeShowDay: unavailable
+        });
+});        
                 </script>                                        
             </ui:define>
             
@@ -52,10 +97,14 @@
                 <li>
                     <h:link outcome="roomlist" value="Rooms" />
                 </li>
+                <li>
+                <h:link outcome="mybookedrooms" rendered="${activeUserMB.logged}">
+                    My Bookings
+                </h:link>                   
+                </li>
             </ui:define>
             <ui:define name="content">
                     <div class="col-md-12">
-                        <div class="col-sm-6 col-md-4">
                             <div class="thumbnail" >
                                 <h4 class="text-center"><span class="label label-info"> ${bookingRoomMB.selRoom.roomType}</span></h4>
                                 
@@ -64,42 +113,52 @@
                                 <div class="caption">
                                     <div class="row">
                                         <div class="col-md-6 col-xs-6">
-                                            <h3>Size: ${bookingRoomMB.selRoom.roomSize}</h3>
+                                            <h3>Size: ${bookingRoomMB.selRoom.roomSize} </h3>
                                         </div>
                                         <div class="col-md-6 col-xs-6 price">
                                             <h3>
                                                 <label>Price: ${bookingRoomMB.selRoom.roomPrice}</label></h3>
                                         </div>
                                     </div>
-                                    <p>${bookingRoomMB.selRoom.roomDescription}</p>
+                                    <h3>Review: ${bookingRoomMB.selRoom.roomDescription}</h3>
                                 </div>
                             </div>
-                            
-                        </div>                    
-                    </div>    
+
                         <h:form>
                             <label>Start Date: </label>
                                 <h:inputText id="datepickerS"
                                              title="From:"
                                              value="#{bookingRoomMB.startDate}">
-                                    <f:validateRequired />
+                                    <f:convertDateTime type="date" pattern="MM/dd/yyyy"/>
                                 </h:inputText>
+                            <h:message for="datepickerS" style="color:red" />
+                            
                             <br/><label>End Date: </label>
                             <h:inputText id="datepickerE"
                                          title="To:"
-                                         value="#{bookingRoomMB.endDate}">
-                                <f:validateRequired />
+                                         value="#{bookingRoomMB.endDate}"
+                                         >
+                                <f:convertDateTime type="date" pattern="MM/dd/yyyy"/>
+
                             </h:inputText>
+                            <h:message for="datepickerE" style="color:red" />
                             <br/><label>Guests with you: </label>
                                 <h:inputText 
                                          title="Guests:"
                                          value="#{bookingRoomMB.guests}">
                                     <f:validateRequired />
-                                </h:inputText>
-                            <h:commandButton action="#{bookingRoomMB.actionBookRoom}" >
+                                </h:inputText>                            
+                            <br />
+                            <h:commandButton class="btn-block" action="#{bookingRoomMB.actionBookRoom}"  rendered="#{bookingRoomMB.updateBookingId == null}" >
                                 <f:param name="selRoomId" value="#{param.selRoomId}" />
                             </h:commandButton>
+                            <h:commandButton class="btn-block" action="#{bookingRoomMB.actionUpdateBooking}" rendered="#{bookingRoomMB.updateBookingId != null}" >
+                                <f:param name="selRoomId" value="#{param.selRoomId}" />
+                                <f:param name="update" value="#{param.update}" />
+                            </h:commandButton>
+                            
                         </h:form>
+                    </div>                            
             </ui:define>
     
         </ui:composition>        
