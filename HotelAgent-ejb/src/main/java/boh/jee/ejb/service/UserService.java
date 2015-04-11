@@ -13,6 +13,7 @@ import boh.jee.ejb.model.Booking;
 import boh.jee.ejb.model.BookingDetail;
 import boh.jee.ejb.model.Guest;
 import boh.jee.ejb.model.Room;
+import boh.jee.ejb.model.User;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -124,10 +125,12 @@ public class UserService implements UserServiceRemote, GenericCrudAdmin {
 
     @Override
     public Boolean userSignUp(Object newUser) {
-        boolean result = false;
+        boolean result = true;
         Guest gst = (Guest)newUser;
+        //Guest tmp = new User();
         
-        TypedQuery q = em.createNamedQuery("Guest.findByGuestName", Guest.class);
+        Query q = em.createNamedQuery("Guest.findByGuestName");
+        q.setParameter("guestName", gst.getGuestName());
         
         List<Guest> users = q.getResultList();
                 
@@ -138,6 +141,11 @@ public class UserService implements UserServiceRemote, GenericCrudAdmin {
             }
         }
         if( result ) {
+//            tmp.setGuestName( gst.getGuestName());
+//            tmp.setGuestPhone(gst.getGuestPhone());
+//            tmp.setGuestEmail(gst.getGuestEmail());
+//            gst.setBookingCollection(new ArrayList<Booking>());
+            //em.persist(tmp);
             em.persist(gst);
         }
         

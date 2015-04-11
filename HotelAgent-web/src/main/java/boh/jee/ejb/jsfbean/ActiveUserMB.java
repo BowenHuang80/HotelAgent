@@ -65,10 +65,9 @@ public class ActiveUserMB implements Serializable {
 
     /**
      * For normal user to create a new account
-     * @param role
      * @return 
      */
-    public String actionSignup(String role) {
+    public String actionSignup() {
         Guest user = null;
         
         user = new User();

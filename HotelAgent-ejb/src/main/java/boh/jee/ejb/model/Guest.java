@@ -70,7 +70,9 @@ public abstract class Guest implements Serializable {
     private String guestEmail;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "guestId")
     private Collection<Booking> bookingCollection;
-
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "guestId")
+    private Collection<BookingDetail> bookingDetailCollection;
+    
     public Guest() {
     }
 
