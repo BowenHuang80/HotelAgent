@@ -29,6 +29,7 @@ public class ApplicationConfig extends Application {
      * If required, comment out calling this method in getClasses().
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
+        resources.add(boh.jee.ejb.restapi.MessageController.class);
         resources.add(boh.jee.ejb.restapi.RoomsController.class);
     }
     

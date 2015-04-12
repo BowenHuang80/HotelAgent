@@ -12,6 +12,13 @@
     </h:head>
     <h:body>
         <ui:composition template="./master.xhtml">
+        <ui:define name="navbar">
+            <li>
+                <h:link  outcome="roomlist" >
+                    Rooms
+                </h:link>
+            </li>
+        </ui:define>            
             <ui:define name="content">
         
                 <div class="container-fluid">

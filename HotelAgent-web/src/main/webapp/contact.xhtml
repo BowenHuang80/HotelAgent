@@ -1,12 +1,107 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html">
-    <h:head>
-        <title>Facelet Title</title>
-    </h:head>
-    <h:body>
-        Hello from Facelets
-    </h:body>
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition template="./master.xhtml">
+        <ui:define name="extrastyle" >
+            .jumbotron {
+            background: #358CCE;
+            color: #FFF;
+            border-radius: 0px;
+            }
+            .jumbotron-sm { padding-top: 24px;
+            padding-bottom: 24px; }
+            .jumbotron small {
+            color: #FFF;
+            }
+            .h1 small {
+            font-size: 24px;
+            }            
+        </ui:define>
+        <ui:define name="navbar" >
+                <h3>
+                <h:outputFormat value="Welcome, {0}!" rendered="${activeUserMB.logged}">
+                    <f:param value="#{activeUserMB.userName}"/>
+                </h:outputFormat>
+                </h3>
+                <li>
+                <h:form>
+                    <h:commandLink action="#{activeUserMB.actionLogout()}" rendered="${activeUserMB.logged}" >
+                        Log out
+                    </h:commandLink>
+                </h:form>
+                <h:link  outcome="login" rendered="${!activeUserMB.logged}" >
+                    Log in
+                </h:link>
+                <h:link  outcome="signup" rendered="${!activeUserMB.logged}" >
+                    Sign up
+                </h:link>                    
+                <h:link outcome="mybookedrooms" rendered="${activeUserMB.logged}">
+                    My Bookings
+                </h:link>                   
+                </li>
+        </ui:define>
+        <ui:define name="content" >
+            <div class="jumbotron jumbotron-sm">
+                <div class="container">
+                    <div class="row">
+                    <div class="col-md-6">
+                        <legend><span class="glyphicon glyphicon-globe"></span> Our office</legend>
+                        <address>
+                            <strong>HotelAgent, Inc.</strong><br />
+                            205 Humber College<br />
+                            <abbr title="Phone">
+                                P:</abbr>
+                            (123) 456-7890
+                        </address>
+                        <address>
+                            <strong>Admin</strong><br />
+                            <a href="mailto:#">bowen.h80@g.com</a>
+                        </address>
+                    </div>                            
+                        </div>
+
+                <h:panelGroup layout="block" styleClass="row" rendered="#{activeUserMB.logged}">
+                        <div class="well well-sm">
+                            <h:form>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="name">
+                                            Name</label>
+                                        <h:inputText styleClass="form-control" id="name" required="required" value="#{activeUserMB.userName}"/>
+                                        <label for="roomid">
+                                            Room Number</label>
+                                        <h:inputText styleClass="form-control" id="roomNumber" required="required" value="#{activeUserMB.roomNumber}"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>
+                                            Your Request: 
+                                        </label>
+                                        <h:inputTextarea value="#{activeUserMB.roomMsg}" id="message" styleClass="form-control" rows="9" cols="25" required="required">
+                                        </h:inputTextarea>
+                                        <br />
+                                    <h:commandButton value="Send Message" action="#{activeUserMB.actionSendMessage}" styleClass="btn btn-primary pull-right" id="btnContactUs">
+                                    </h:commandButton>
+                                </div>
+
+                                </div>
+                            </div>
+                            </h:form>
+                    </div>                   
+            </h:panelGroup>
+                    </div>
+                </div>                    
+        </ui:define>    
+</ui:composition>    
 </html>
 

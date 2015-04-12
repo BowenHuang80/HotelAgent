@@ -10,72 +10,6 @@
         <ui:composition template="./master.xhtml">
             <ui:define name="extrastyle">
                 <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"/>
-                <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
-                <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>                                    
-
-                <script>
-$(function(){
-var dates = {
-    convert:function(d) {
-        return (
-            d.constructor === Date ? d :
-            d.constructor === Array ? new Date(d[0],d[1],d[2]) :
-            d.constructor === Number ? new Date(d) :
-            d.constructor === String ? new Date(d) :
-            typeof d === "object" ? new Date(d.year,d.month,d.date) :
-            NaN
-        );
-    },
-    compare:function(a,b) {
-        return (
-            isFinite(a=this.convert(a).valueOf()) &amp;&amp;
-            isFinite(b=this.convert(b).valueOf()) ?
-            (a&gt;b)-(a&lt;b) :
-            NaN
-        );
-    },
-    inRange:function(d,start,end) {
-       return (
-            isFinite(d=this.convert(d).valueOf()) &amp;&amp;
-            isFinite(start=this.convert(start).valueOf()) &amp;&amp;
-            isFinite(end=this.convert(end).valueOf()) ?
-            start &lt;= d &amp;&amp; d &lt;= end :
-            NaN
-        );
-    }
-}    
-var unavailableDates = [${bookingRoomMB.roomAvailability}];//[{startDate:"3-9-2015", endDate : "2015-03-14T12:00:00Z"}]; 
-//var sd = new Date("2015-03-09T12:00:00Z");
-    
-function unavailable(date) {
-    var startdate;
-    var enddate;
-    var result = true;
-    
-    for( var dt in unavailableDates ) {
-        startdate = new Date(unavailableDates[dt].startDate);
-        enddate = new Date(unavailableDates[dt].endDate);
-        if(dates.inRange(date,startdate,enddate ) ) {
-            result = false;
-            break;
-        }
-    }    
-    
-    if ( !result ){
-        return [false, "", "Unavailable"];
-    } else {
-        return [true, ""];
-    }
-}
-    
-    $( "[id^=j_idt][id*=datepicker]" ).datepicker(
-        {
-            minDate: new Date(),
-            maxDate: "+2m",
-            beforeShowDay: unavailable
-        });
-});        
-                </script>                                        
             </ui:define>
             
             <ui:define name="navbar">
@@ -160,7 +94,74 @@ function unavailable(date) {
                         </h:form>
                     </div>                            
             </ui:define>
+
+            <ui:define name="extrajs" >
+                <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+                <script>
+$(function(){
+var dates = {
+    convert:function(d) {
+        return (
+            d.constructor === Date ? d :
+            d.constructor === Array ? new Date(d[0],d[1],d[2]) :
+            d.constructor === Number ? new Date(d) :
+            d.constructor === String ? new Date(d) :
+            typeof d === "object" ? new Date(d.year,d.month,d.date) :
+            NaN
+        );
+    },
+    compare:function(a,b) {
+        return (
+            isFinite(a=this.convert(a).valueOf()) &amp;&amp;
+            isFinite(b=this.convert(b).valueOf()) ?
+            (a&gt;b)-(a&lt;b) :
+            NaN
+        );
+    },
+    inRange:function(d,start,end) {
+       return (
+            isFinite(d=this.convert(d).valueOf()) &amp;&amp;
+            isFinite(start=this.convert(start).valueOf()) &amp;&amp;
+            isFinite(end=this.convert(end).valueOf()) ?
+            start &lt;= d &amp;&amp; d &lt;= end :
+            NaN
+        );
+    }
+}    
+var unavailableDates = [${bookingRoomMB.roomAvailability}];//[{startDate:"3-9-2015", endDate : "2015-03-14T12:00:00Z"}]; 
+//var sd = new Date("2015-03-09T12:00:00Z");
     
+function unavailable(date) {
+    var startdate;
+    var enddate;
+    var result = true;
+    
+    for( var dt in unavailableDates ) {
+        startdate = new Date(unavailableDates[dt].startDate);
+        enddate = new Date(unavailableDates[dt].endDate);
+        if(dates.inRange(date,startdate,enddate ) ) {
+            result = false;
+            break;
+        }
+    }    
+    
+    if ( !result ){
+        return [false, "", "Unavailable"];
+    } else {
+        return [true, ""];
+    }
+}
+    
+    $( "[id^=j_idt][id*=datepicker]" ).datepicker(
+        {
+            minDate: new Date(),
+            maxDate: "+2m",
+            beforeShowDay: unavailable
+        });
+});        
+                </script>                                        
+                
+            </ui:define>
         </ui:composition>        
 
 </html>

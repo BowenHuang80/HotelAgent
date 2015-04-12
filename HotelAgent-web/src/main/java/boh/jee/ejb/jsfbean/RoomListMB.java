@@ -12,6 +12,7 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.RequestScoped;
 import javax.faces.bean.SessionScoped;
 /**
  *
@@ -19,7 +20,7 @@ import javax.faces.bean.SessionScoped;
  */
 @ManagedBean
 //@SessionScoped
-@ApplicationScoped
+@RequestScoped
 public class RoomListMB implements Serializable {
 
     @EJB
@@ -31,11 +32,14 @@ public class RoomListMB implements Serializable {
      * Creates a new instance of RoomListMB
      */
     public RoomListMB() {
-        
+        roomList = null;
     }
     
     public List<Room> getRoomList() {
-        roomList = (List<Room>)rm.getAll();
+        if( roomList == null ) {
+            roomList = (List<Room>)rm.getAll();
+        }
+        
         return roomList;
     }
     

@@ -7,6 +7,7 @@ package boh.jee.ejb.service;
 
 import boh.jee.ejb.hotelagent.remotelib.RoomServiceRemote;
 import boh.jee.ejb.model.BookingDetail;
+import boh.jee.ejb.model.CustomerMessage;
 import boh.jee.ejb.model.Room;
 import java.util.Date;
 import java.util.List;
@@ -17,6 +18,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 
 /**
  *
@@ -62,6 +64,26 @@ public class RoomService implements RoomServiceRemote {
         List<BookingDetail> lst = q.getResultList();
 
         return lst;
+    }
+
+    @Override
+    public List<CustomerMessage> getMessageByDate(Date date) {
+        
+        TypedQuery q = em.createNamedQuery("CustomerMessage.findNewByMsgTime", CustomerMessage.class);
+        q.setParameter("msgTime", date);
+        
+        List l = q.getResultList();
+        
+        //for(CustomerMessage)
+        
+        return l;
+    }
+
+    @Override
+    public List<CustomerMessage> getAllMessages() {
+        TypedQuery q = em.createNamedQuery("CustomerMessage.findAll", CustomerMessage.class);
+        
+        return q.getResultList();
     }
     
     

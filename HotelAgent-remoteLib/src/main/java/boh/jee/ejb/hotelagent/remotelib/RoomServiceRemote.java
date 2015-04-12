@@ -6,6 +6,7 @@
 package boh.jee.ejb.hotelagent.remotelib;
 
 import java.util.Date;
+import java.util.List;
 import javax.ejb.Remote;
 
 /**
@@ -20,5 +21,9 @@ public interface RoomServiceRemote {
     Object getRoomById(Integer roomId);
 
     Object findRoomAvailability(Integer roomId, Date startDate, Date endDate);
+
+    List getMessageByDate(Date date);
+
+    List getAllMessages();
     
 }

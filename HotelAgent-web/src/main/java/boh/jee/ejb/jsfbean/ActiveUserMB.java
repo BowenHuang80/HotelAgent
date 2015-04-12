@@ -23,11 +23,21 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.Queue;
+import javax.jms.QueueConnection;
+import javax.jms.QueueConnectionFactory;
+import javax.jms.QueueSender;
+import javax.jms.QueueSession;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import org.primefaces.context.RequestContext;
 
 /**
@@ -50,10 +60,20 @@ public class ActiveUserMB implements Serializable {
     private boolean illegalAccess;
     private String errorMsg;
     
+    //Room number for Service 
+    private String roomNumber;
+    private String roomMsg;
+    
     @EJB
     private UserServiceRemote userSrv;
     
-    
+    @Resource(mappedName = "jms/QueueFactory")
+    private QueueConnectionFactory connectionFactory;
+
+    @Resource(mappedName = "jms/myQueue")
+    private Queue queue;
+
+    private Connection connection;    
     
     /**
      * Creates a new instance of ActiveUserMB
@@ -93,9 +113,11 @@ public class ActiveUserMB implements Serializable {
 //        } catch (HAException ex) {
 //            Logger.getLogger(ActiveUserMB.class.getName()).log(Level.SEVERE, null, ex);
 //        }
-        
+        try {
         activeUser = (Guest) userSrv.userLogin(getUserName(), getUserPhone()) ;
-        
+        } catch (Exception e) {
+            
+        }
         if( null != activeUser ) {
             logged = true;
             if( activeUser instanceof Admin ) {
@@ -275,6 +297,66 @@ public class ActiveUserMB implements Serializable {
         }
         return true;
     } 
+    
+    public String actionSendMessage() {
+
+        try {
+            QueueConnection queueConnection =
+                    connectionFactory.createQueueConnection();
+            
+            QueueSession queueSession =   queueConnection.createQueueSession(false,
+                    Session.AUTO_ACKNOWLEDGE);
+            
+            QueueSender queueSender = queueSession.createSender(queue);
+            
+            TextMessage message = queueSession.createTextMessage();
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append("ROOMNUMBER:").append(this.roomNumber).append("\n")
+                    .append("GUESTNAME:").append(activeUser.getGuestName()).append("\n")
+                    .append("TEXT:" + getRoomMsg());
+            
+            message.setText(sb.toString());
+            queueSender.send(message);
+            
+//            queueSender.close();
+//            queueSession.close();
+//            queueConnection.close();
+            
+        } catch (JMSException ex) {
+            Logger.getLogger(ActiveUserMB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            return "roomlist?faces-redirect=true";        
+    }
+
+    /**
+     * @return the roomNumber
+     */
+    public String getRoomNumber() {
+        return roomNumber;
+    }
+
+    /**
+     * @param roomNumber the roomNumber to set
+     */
+    public void setRoomNumber(String roomNumber) {
+        this.roomNumber = roomNumber;
+    }
+
+    /**
+     * @return the roomMsg
+     */
+    public String getRoomMsg() {
+        return roomMsg;
+    }
+
+    /**
+     * @param roomMsg the roomMsg to set
+     */
+    public void setRoomMsg(String roomMsg) {
+        this.roomMsg = roomMsg;
+    }
+    
     public static class BookingRooms {
         Room room;
         BookingDetail bookingDetail;
