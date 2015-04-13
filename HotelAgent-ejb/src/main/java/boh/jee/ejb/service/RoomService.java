@@ -69,12 +69,16 @@ public class RoomService implements RoomServiceRemote {
     @Override
     public List<CustomerMessage> getMessageByDate(Date date) {
         
-        TypedQuery q = em.createNamedQuery("CustomerMessage.findNewByMsgTime", CustomerMessage.class);
-        q.setParameter("msgTime", date);
+        TypedQuery q = em.createNamedQuery("CustomerMessage.findByMsgDone", CustomerMessage.class);
+        q.setParameter("msgDone", Boolean.FALSE);
+        //q.setParameter("msgTime", date);
         
-        List l = q.getResultList();
+        List<CustomerMessage> l = q.getResultList();
         
-        //for(CustomerMessage)
+        for(CustomerMessage msg : l) {
+            msg.setMsgDone(Boolean.TRUE);
+            em.merge(msg);
+        }
         
         return l;
     }

@@ -68,7 +68,7 @@ public class MessageController {
 
     @GET
     @Path("{msgdate}") //{roomid : (/[\\d+])?}")
-    public /*synchronized*/ Response getRoomById(@PathParam("msgdate") long msgdate) {
+    public /*synchronized*/ Response getRecentMessage(@PathParam("msgdate") long msgdate) {
         String json;
         ObjectMapper mapper = new ObjectMapper();
         Object jsonobj;

@@ -7,6 +7,8 @@ package boh.jee.ejb.service;
 
 import boh.jee.ejb.model.CustomerMessage;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Resource;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
@@ -49,39 +51,42 @@ public class CustomerSpecialRequest implements MessageListener {
     public void onMessage(Message message) {
         TextMessage tmsg = null;
         
-        try {
-            if(message instanceof TextMessage) {
-                tmsg = (TextMessage) message;
-                Date msgTime = new Date(tmsg.getJMSTimestamp());
-                CustomerMessage msg = new CustomerMessage();
-                
-                String msgStr = tmsg.getText();
-                int roomIdIdx = msgStr.indexOf("ROOMNUMBER:");
-                String roomId = msgStr.substring(roomIdIdx+"ROOMNUMBER:".length(), msgStr.indexOf("\n", roomIdIdx));
-                
-                msg.setRoomNumber(roomId);
-                
-                int guestIdIdx = msgStr.indexOf("GUESTNAME:");
-                String guestId = msgStr.substring(guestIdIdx+"GUESTNAME:".length(), msgStr.indexOf("\n", guestIdIdx));
-                msg.setGuestName(guestId);
-                
-                int msgIdx =msgStr.indexOf("TEXT:");
-                String msg_text = msgStr.substring(msgIdx + "TEXT:".length(), msgStr.length() );
-                
-                msg.setMsgText(msg_text);
-                
-                msg.setMsgTime(msgTime);
-                
+        if(message instanceof TextMessage) {
+            tmsg = (TextMessage) message;
+            Date msgTime=null;
+            String msgStr=null;
+            try {
+                msgTime = new Date(tmsg.getJMSTimestamp());
+                msgStr = tmsg.getText();
+            } catch (JMSException ex) {
+                Logger.getLogger(CustomerSpecialRequest.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            CustomerMessage msg = new CustomerMessage();
+
+
+            int roomIdIdx = msgStr.indexOf("ROOMNUMBER:");
+            String roomId = msgStr.substring(roomIdIdx+"ROOMNUMBER:".length(), msgStr.indexOf("\n", roomIdIdx));
+
+            msg.setRoomNumber(roomId);
+
+            int guestIdIdx = msgStr.indexOf("GUESTNAME:");
+            String guestId = msgStr.substring(guestIdIdx+"GUESTNAME:".length(), msgStr.indexOf("\n", guestIdIdx));
+            msg.setGuestName(guestId);
+
+            int msgIdx =msgStr.indexOf("TEXT:");
+            String msg_text = msgStr.substring(msgIdx + "TEXT:".length(), msgStr.length() );
+
+            msg.setMsgText(msg_text);
+
+            msg.setMsgTime(msgTime);
+            msg.setMsgDone(Boolean.FALSE);
+            try {
                 em.persist(msg);
+            }catch(Exception e) {
+                e.printStackTrace();
             }
-            else {
-                //System.out.println("MDB: " + "Wrong Message Type! " + message.getClass().getName());
-            }
-        } catch(JMSException e) {
-            e.printStackTrace();
-        } catch(Throwable e) {
-            e.printStackTrace();
-        }        
+        }
     }
     
 }

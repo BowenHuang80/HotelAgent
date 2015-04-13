@@ -32,29 +32,41 @@
         <ui:define name="content">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-6">
-                        <textarea id="msg" rows="2" cols="25">
+                    <div class="col-md-12">
+                        <textarea id="msgArea" rows="2" cols="25">
                         </textarea>
-                        <p id="msgArea" >
-                            
-                        </p>
                     </div>
                 </div>
             </div>
         </ui:define>
         <ui:define name="extrajs" >
             <script>
+                var my_date_format = function(input){
+                    var d = new Date(input);
+                    var month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    var date = d.getDate() + " " + month[d.getMonth()] + ", " + d.getFullYear();
+                    var time = d.toLocaleTimeString().toLowerCase().replace(/([\d]+:[\d]+):[\d]+(\s\w+)/g, "$1$2");
+                    return (date + " " + time);  
+                };                
                 $(function(){
+                    $('#msgArea').append("Room Service");
+                    
                     setInterval(function() {
-                        var datetime = new Date().getTime();
+                        var datetime = new Date().getTime()-5000;
+                        
                         $.getJSON("restapiv1/message/" + datetime)
                           .done(function (data) {
                               // On success, 'data' contains a list of products.
                               //$('#top10books').empty();
-                              $.each(data, function (key, value) {
-                                  // Add a list item for the product.
-                                  $('<li>', { text: value.roomNumber + "    " +value.msgText}).appendTo($('#msgArea'));
-                                  //$('</li>', { text: "").appendTo($('#msgArea'));
+                              var oldt = $('#msgArea').val();
+                              $.each(data, function (key,value) {
+                                  
+                                  oldt += "\nRoom: " + value.roomNumber;
+                                  oldt += "\nGuest :" + value.guestName;
+                                  oldt += "\nTime: " + my_date_format(value.msgTime);
+                                  oldt += "\nText: " + value.msgText;
+                                  oldt += "\n-----------------------------\n";
+                                  $('#msgArea').val( oldt);
                               });
                           }); 
                     }, 5000); 

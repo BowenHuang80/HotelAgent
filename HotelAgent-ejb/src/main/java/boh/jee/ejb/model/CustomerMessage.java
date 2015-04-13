@@ -30,18 +30,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "MESSAGE")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "CustomerMessage.findNewByMsgTime", query = "SELECT c FROM CustomerMessage c WHERE c.msgTime >= :msgTime and c.processed=false"),
     @NamedQuery(name = "CustomerMessage.findAll", query = "SELECT c FROM CustomerMessage c"),
     @NamedQuery(name = "CustomerMessage.findByMsgId", query = "SELECT c FROM CustomerMessage c WHERE c.msgId = :msgId"),
     @NamedQuery(name = "CustomerMessage.findByRoomNumber", query = "SELECT c FROM CustomerMessage c WHERE c.roomNumber = :roomNumber"),
     @NamedQuery(name = "CustomerMessage.findByGuestName", query = "SELECT c FROM CustomerMessage c WHERE c.guestName = :guestName"),
-    @NamedQuery(name = "CustomerMessage.findByMsgTime", query = "SELECT c FROM CustomerMessage c WHERE c.msgTime >= :msgTime"),
-    @NamedQuery(name = "CustomerMessage.findByMsgText", query = "SELECT c FROM CustomerMessage c WHERE c.msgText = :msgText")})
+    @NamedQuery(name = "CustomerMessage.findByMsgTime", query = "SELECT c FROM CustomerMessage c WHERE c.msgTime = :msgTime"),
+    @NamedQuery(name = "CustomerMessage.findByMsgText", query = "SELECT c FROM CustomerMessage c WHERE c.msgText = :msgText"),
+    @NamedQuery(name = "CustomerMessage.findByMsgDone", query = "SELECT c FROM CustomerMessage c WHERE c.msgDone = :msgDone")})
 public class CustomerMessage implements Serializable {
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "PROCESSED")
-    private Boolean processed;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,6 +62,8 @@ public class CustomerMessage implements Serializable {
     @Size(min = 1, max = 200)
     @Column(name = "MSG_TEXT")
     private String msgText;
+    @Column(name = "MSG_DONE")
+    private Boolean msgDone;
 
     public CustomerMessage() {
     }
@@ -121,6 +119,14 @@ public class CustomerMessage implements Serializable {
         this.msgText = msgText;
     }
 
+    public Boolean getMsgDone() {
+        return msgDone;
+    }
+
+    public void setMsgDone(Boolean msgDone) {
+        this.msgDone = msgDone;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -144,14 +150,6 @@ public class CustomerMessage implements Serializable {
     @Override
     public String toString() {
         return "boh.jee.ejb.model.CustomerMessage[ msgId=" + msgId + " ]";
-    }
-
-    public Boolean getProcessed() {
-        return processed;
-    }
-
-    public void setProcessed(Boolean processed) {
-        this.processed = processed;
     }
     
 }
